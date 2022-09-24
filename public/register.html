@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+    <title>Document</title>
+</head>
+
+<body>
+    <form id="registerForm">
+        <div>
+            <label>用户名<input type="text" name="name"></label>
+        </div>
+        <div>
+            <label>密码<input type="password" name="password"></label>
+        </div>
+        <div>
+            <button type="submit">注册</button>
+        </div>
+    </form>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script>
+        const $form = $('#registerForm')
+        $form.on('submit', (e) => {
+            e.preventDefault()
+            const name = $form.find('input[name=name]').val()
+            const password = $form.find('input[name=password]').val()
+            console.log(name, password)
+        })
+    </script>
+</body>
+
+</html>
