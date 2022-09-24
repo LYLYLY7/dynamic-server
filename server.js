@@ -42,11 +42,20 @@ var server = http.createServer(function (request, response) {
                 response.end(`{"errorCode": 4001}`)
             } else {
                 response.statusCode = 200
+                // 用cookie标记
+                response.setHeader('Set-Cookie', 'logined=1')
                 response.end()
             }
         })
     } else if (path === '/home.html') {
-        // 当前用户无法写出
+        // 用户登录完成，用cookie标记
+        const cookie = request.headers['cookie']
+        console.log(cookie)
+        if (cookie === "logined=1") {
+            const homeHtml = fs.readFileSync("./public/home.html").toString()
+            const string = homeHtml.replace('{{loginStatus}}', "已登录")
+            response.write(string)
+        }
         response.end('home')
     }
     else if (path === "/register" && method === "POST") {
