@@ -20,7 +20,37 @@ var server = http.createServer(function (request, response) {
     /******** 从这里开始看，上面不要看 ************/
 
     console.log('有个傻子发请求过来啦！路径（带查询参数）为：' + pathWithQuery)
-    if (path === "/register" && method === "POST") {
+    if (path === "/sign_in" && method === "POST") {
+        // 首先读取数据库
+        const usersArray = JSON.parse(fs.readFileSync("./db/users.json"))
+        const array = []
+        // 点击发送请求,将用户名和用户密码存入空数组
+        request.on("data", chunk => {
+            array.push(chunk)
+        })
+        request.on("end", () => {
+            // Buffer把不同数据合成一个字符串
+            const string = Buffer.concat(array).toString()
+            const obj = JSON.parse(string)
+            // 查看数据库里面的用户名和密码是否匹配
+            const user = usersArray.find((user) => user.name === obj.name && user.password === obj.password)
+            // console.log(user)
+            // 如果不匹配 响应状态码设置为400 
+            if (user === undefined) {
+                response.statusCode = 400
+                response.setHeader("Content-Type", "text/json;charset=utf-8")
+                response.end(`{"errorCode": 40001}`)
+            } else {
+                response.statusCode = 200
+                response.setHeader("Content-Type", "text/json;charset=utf-8")
+                response.end()
+            }
+        })
+    } else if (path === '/home.html') {
+        // 当前用户无法写出
+        response.end('home')
+    }
+    else if (path === "/register" && method === "POST") {
         //设置 响应头的编码格式
         response.setHeader("Content-Type", "text/html;charset=UTF-8")
         // 首先读取数据库
