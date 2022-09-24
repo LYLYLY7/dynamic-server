@@ -43,26 +43,35 @@ var server = http.createServer(function (request, response) {
             } else {
                 response.statusCode = 200
                 // 用cookie标记
-                response.setHeader('Set-Cookie', 'logined=1')
-                response.end()
+                response.setHeader('Set-Cookie', `user_id=${user.id};HttpOnly`)
             }
         })
     } else if (path === '/home.html') {
         // 用户登录完成，用cookie标记
         const cookie = request.headers['cookie']
-        console.log(cookie)
+        let userId
+        try {
+            userId = (cookie.split(';').filter(s => { s.indexOf('user_id=') >= 0 })[0].split('=')[1])
+        } catch (error) { }
+        if (userId) {
+            const usersArray = JSON.parse(fs.readFileSync("./db/users.json"))
+            usersArray.find(user => { user.id.toString() === userId })
+            const homeHtml = fs.readFileSync("./public/home.html").toString()
+            let string
+            if (user) {
+                const string = homeHtml.replace('{{loginStatus}}', "已登录").replace('{{user.name}}', user.name)
+            } else { }
+        }
         if (cookie === "logined=1") {
             const homeHtml = fs.readFileSync("./public/home.html").toString()
             const string = homeHtml.replace('{{loginStatus}}', "已登录")
             response.write(string)
         } else {
             const homeHtml = fs.readFileSync("./public/home.html").toString()
-            const string = homeHtml.replace('{{loginStatus}}', "未登录")
+            const string = homeHtml.replace('{{loginStatus}}', "未登录").replace('{{user.name}}', '')
             response.write(string)
         }
-        response.end('home')
-    }
-    else if (path === "/register" && method === "POST") {
+    } else if (path === "/register" && method === "POST") {
         //设置 响应头的编码格式
         response.setHeader("Content-Type", "text/html;charset=UTF-8")
         // 首先读取数据库
@@ -89,10 +98,7 @@ var server = http.createServer(function (request, response) {
             usersArray.push(newUser)
             // 记得读取和写入json时,文件格式都是字符串形式
             fs.writeFileSync("./db/users.json", JSON.stringify(usersArray))
-            response.end()
         })
-
-
     } else {
         response.statusCode = 200
         // 如果path是/则换为/index.html。不是则是path
@@ -124,8 +130,8 @@ var server = http.createServer(function (request, response) {
             response.statusCode = 404
         }
         response.write(content)
-        response.end()
     }
+    response.end()
 
     /******** 代码结束，下面不要看 ************/
 })
