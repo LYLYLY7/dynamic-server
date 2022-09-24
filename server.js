@@ -20,38 +20,70 @@ var server = http.createServer(function (request, response) {
     /******** 从这里开始看，上面不要看 ************/
 
     console.log('有个傻子发请求过来啦！路径（带查询参数）为：' + pathWithQuery)
+    if (path === "/register" && method === "POST") {
+        //设置 响应头的编码格式
+        response.setHeader("Content-Type", "text/html;charset=UTF-8")
+        // 首先读取数据库
+        const usersArray = JSON.parse(fs.readFileSync("./db/users.json"))
+        const array = []
+        // 点击发送请求,将数据存入空数组
+        request.on("data", chunk => {
+            array.push(chunk)
+        })
+        request.on("end", () => {
+            // Buffer把不同数据合成一个字符串
+            const string = Buffer.concat(array).toString()
+            const obj = JSON.parse(string)
+            // 数据库最后一个数据
+            const lastUser = usersArray[usersArray.length - 1]
+            const newUser = {
+                // 如果数据库不是空的,就最后一个数据id加1
+                // 如果是空的,则为第一个
+                id: lastUser ? lastUser.id + 1 : 1,
+                // 将数组里的注册数据存到newUser
+                name: obj.name,
+                password: obj.password
+            }
+            usersArray.push(newUser)
+            // 记得读取和写入json时,文件格式都是字符串形式
+            fs.writeFileSync("./db/users.json", JSON.stringify(usersArray))
+            response.end()
+        })
 
-    response.statusCode = 200
-    // 如果path是/则换为/index.html。不是则是path
-    // 默认首页
-    const filePath = path === '/' ? '/index.html' : path
-    // 获得路径文件后缀.的位置
-    const index = filePath.lastIndexOf('.')
-    // 将.的位置传给suffix（后缀）
-    const suffix = filePath.substring(index)
-    console.log(suffix)
-    // 利用哈希表存储所有的后缀格式
-    const fileTypes = {
-        '.html': 'text/html',
-        '.css': 'text/css',
-        '.js': 'text/javascript',
-        '.png': 'image/png',
-        '.jpg': 'image/jpeg'
+
+    } else {
+        response.statusCode = 200
+        // 如果path是/则换为/index.html。不是则是path
+        // 默认首页
+        const filePath = path === '/' ? '/index.html' : path
+        // 获得路径文件后缀.的位置
+        const index = filePath.lastIndexOf('.')
+        // 将.的位置传给suffix（后缀）
+        const suffix = filePath.substring(index)
+        console.log(suffix)
+        // 利用哈希表存储所有的后缀格式
+        const fileTypes = {
+            '.html': 'text/html',
+            '.css': 'text/css',
+            '.js': 'text/javascript',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg'
+        }
+        // 利用哈希表
+        // 当路径名you.html 则setHeader更改为text/html
+        response.setHeader('Content-Type', `${fileTypes[suffix]};charset=utf-8`)
+        let content
+        // try catch捕捉错误
+        // 如果content存在则继续执行，如果不存在则是错误，返回文件不存在
+        try {
+            content = fs.readFileSync(`./public${filePath}`)
+        } catch (error) {
+            content = '文件不存在'
+            response.statusCode = 404
+        }
+        response.write(content)
+        response.end()
     }
-    // 利用哈希表
-    // 当路径名you.html 则setHeader更改为text/html
-    response.setHeader('Content-Type', `${fileTypes[suffix]};charset=utf-8`)
-    let content
-    // try catch捕捉错误
-    // 如果content存在则继续执行，如果不存在则是错误，返回文件不存在
-    try {
-        content = fs.readFileSync(`./public${filePath}`)
-    } catch (error) {
-        content = '文件不存在'
-        response.statusCode = 404
-    }
-    response.write(content)
-    response.end()
 
     /******** 代码结束，下面不要看 ************/
 })

@@ -31,12 +31,16 @@
             console.log(name, password)
             $.ajax({
                 method: 'POST',
+                // 用get会把数据放在url后面
                 url: '/register',
+                // url路径
                 contentType: 'text/json; charset=UTF-8 ',
-                data: JSON.stringify({
-                    name, password
-                })
-            })
+                data: JSON.stringify({ name: name, password: password })
+                // 将数据转为字符串
+            }).then(() => {
+                alert: "注册成功"
+                location.href("./public/sign_in.html")
+            }, () => { })
         })
     </script>
 </body>
