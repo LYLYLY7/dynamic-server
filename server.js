@@ -39,10 +39,9 @@ var server = http.createServer(function (request, response) {
             if (user === undefined) {
                 response.statusCode = 400
                 response.setHeader("Content-Type", "text/json;charset=utf-8")
-                response.end(`{"errorCode": 40001}`)
+                response.end(`{"errorCode": 4001}`)
             } else {
                 response.statusCode = 200
-                response.setHeader("Content-Type", "text/json;charset=utf-8")
                 response.end()
             }
         })
