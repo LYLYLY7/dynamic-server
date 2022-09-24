@@ -55,6 +55,10 @@ var server = http.createServer(function (request, response) {
             const homeHtml = fs.readFileSync("./public/home.html").toString()
             const string = homeHtml.replace('{{loginStatus}}', "已登录")
             response.write(string)
+        } else {
+            const homeHtml = fs.readFileSync("./public/home.html").toString()
+            const string = homeHtml.replace('{{loginStatus}}', "未登录")
+            response.write(string)
         }
         response.end('home')
     }
